@@ -12,5 +12,12 @@ void mmm_freeup();
 void mmm_seq();
 void* mmm_par(void *);
 double mmm_verify();
+void sigmaMult(int i, int j, double ** matrix);
+
+typedef struct t_args{
+    int id;
+    int startRow;
+    int endRow;
+} t_args;
 
 #endif /* MMM_H_ */

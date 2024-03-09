@@ -39,12 +39,13 @@ int main(int argc, char *argv[]) {
 		return 0;
 		}
 	// initialize my matrices
-	mmm_init();
+	
 	double clockstart, clockend;
 
 	// << stuff I want to clock here >>
 	if(mode == 0){
 		double seq_time = 0.0;
+		mmm_init();
 		for(int i = 0; i < NUM_RUNS; i++){//number of runs
 			clockstart = rtclock();
 			mmm_seq();
@@ -53,6 +54,7 @@ int main(int argc, char *argv[]) {
 			seq_time += (clockend - clockstart);//calc time
 			}
 		}
+		mmm_freeup();
 		seq_time = (seq_time / (NUM_RUNS - 1));//calc avg
 		printf("=======\nmode: Sequential\nthread count: 1\nsize: %d\n=======\n", size);
 		printf("Sequential Time (%d run avg): %lf sec\n", (NUM_RUNS -1), seq_time);
@@ -61,7 +63,9 @@ int main(int argc, char *argv[]) {
 	else if(mode == 1){
 		double seq_time = 0.0;
 		double par_time = 0.0;
+		double verify = 0.0;
 		for(int i = 0; i < NUM_RUNS; i++){
+		mmm_init();
 		//parallel stuff
 		clockstart = rtclock();
 		t_args *args = (t_args*) malloc(num_threads * sizeof(t_args));//memory
@@ -99,13 +103,14 @@ int main(int argc, char *argv[]) {
 		seq_time += (clockend - clockstart);
 		}
 
-
+		verify = mmm_verify();
 		free(args);
 		args = NULL;
 		free(threads);//return memory and reset matricies
 		threads = NULL;
-		mmm_reset(SEQ_MATRIX);
-		mmm_reset(PAR_MATRIX);
+		mmm_freeup();
+		// mmm_reset(SEQ_MATRIX);
+		// mmm_reset(PAR_MATRIX);
 		}
 		seq_time = seq_time / (NUM_RUNS - 1);//avg times
 		par_time = par_time / (NUM_RUNS - 1);
@@ -114,9 +119,9 @@ int main(int argc, char *argv[]) {
 		printf("Sequential Time (%d run avg): %lf sec\n",(NUM_RUNS -1), seq_time);
 		printf("Parallel time (%d run avg): %lf sec\n", (NUM_RUNS -1), par_time);
 		printf("Speedup: %lf\n", seq_time / par_time);
-		printf("Verifying... largest error is %lf\n", mmm_verify());
+		printf("Verifying... largest error is %lf\n", verify);
 	}
 
-	mmm_freeup();//give everything back
+	//mmm_freeup();//give everything back
 	return 0;
 }
